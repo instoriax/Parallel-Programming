@@ -1,0 +1,10 @@
+根據程式結果，可以看到：
+當VECTOR_WIDTH增加時，vector utilization會下降。
+
+推測原因為：
+在我的程式中，首先會將指數項y不等於0的index，在mask中用1來表示。然後每執行"pp_vmult_float"一次，就把指數項都減一，再來檢查指數項是否大於0，如果等於0，則在mask中相對應的index變為0。最後重複以上步驟，直到mask全部為0。
+
+在長度為VECTOR_WIDTH的vector中，以上步驟重複的次數，為其中指數項最大的那個y，即使其它指數項較小的位置已經算完了，依舊會占掉vector中的一個位置，所以：
+已經算完的index占著位置卻沒有實際運算，這是vector utilization變低的主因。
+
+而VECTOR_WIDTH越大，其中指數項的最大值與其它值容易差距越大，造成指數項最大的y的位置還沒算完，但會有越多占著位置卻沒有實際運算的index，使得vector utilization下降更多。
